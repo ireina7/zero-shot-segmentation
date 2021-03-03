@@ -134,3 +134,6 @@ dataset/voc2012/ImageSets
 dataset/voc2012/JPEGImages
 dataset/voc2012/SegmentationClass
 dataset/voc2012/SegmentationObject
+dataset/voc2012/SegmentationClass_aug
+
+output/
