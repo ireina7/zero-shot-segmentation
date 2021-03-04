@@ -72,12 +72,13 @@ class Our_Model(nn.Module):
     The main model of our algorithm
     """
     def __init__(self, split):
-        super(Our_Model,self).__init__()
+        super(Our_Model, self).__init__()
         self.vgg = Deeplab()
         self.projection = Projection("all", "all", split)
 
     def forward(self, x, which_W=None, which_branch=None):
         x = self.vgg(x)
+        #print(x.shape)
         assert which_W in ["strong", "weak", "all", None]
         return self.projection(x, which_W)
 
@@ -112,3 +113,16 @@ class Our_Model(nn.Module):
 
     def optim_parameters_10x(self, args):
         return [{"params": self.get_10x_lr_params(), "lr": 10 * args.learning_rate}]
+
+
+
+
+class Decoder(nn.Module):
+    def __init__(self, split):
+        super(Decoder, self).__init__()
+        self.encoder = Our_Model(split)
+        self.decoder = {}
+
+    def forward(self, x, which_W=None, which_branch=None):
+        x = self.encoder(x)
+        return x

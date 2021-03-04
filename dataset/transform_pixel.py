@@ -154,7 +154,7 @@ class ToTensor(object):
         mask = np.array(sample["label"]).astype(np.float32)
         tmp = np.copy(mask)
         for i in self.ignore:
-            tmp[mask == i] = 255
+            tmp[mask == i] = 0 #!!255
         for i in self.classes:
             #print(tmp[mask == i])
             tmp[mask == i] = self.RELABELED_CLASSES_DIC[i]

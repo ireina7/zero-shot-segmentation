@@ -51,9 +51,14 @@ def main():
     data_len = len(train_loader)
     num_steps = data_len * args.num_epochs
 
+    '''
     optimizer = optim.SGD(
         model.optim_parameters_1x(args),
         lr=args.learning_rate, momentum=args.momentum, weight_decay=args.weight_decay)
+    '''
+    optimizer = optim.Adam(
+        model.optim_parameters_1x(args),
+        lr=args.learning_rate, weight_decay=args.weight_decay)
     optimizer.zero_grad()
 
     optimizer_10x = optim.SGD(
@@ -93,11 +98,17 @@ def main():
                 _, batch = train_iter.__next__()
 
             images, masks = batch["image"], batch["label"]
+            #pyplot.imshow(images[0])
+            #pyplot.show()
+            #pyplot.imshow(masks[0])
+            #pyplot.show()
+            print(masks[0])
             images = images.to(device)
             masks = masks.long().to(device)
             pred = model(images, "all")
 
             pred = interp(pred)
+
             #vis = to_color_img(pred.clone().detach())
             #print(vis.shape)
             #pyplot.imshow(vis)
@@ -109,10 +120,15 @@ def main():
 
             max_ = torch.argmax(pred, 1)
             #print(max_[0])
-            if i % 20 == 0:
-                pyplot.imshow(max_[0].clone().detach())
-                #pyplot.imshow(masks[0])
+            if i % 10 == 0:
+                ans = max_[0].clone().detach().numpy()
+                x = np.where(ans == 0, 255, ans)
+                #x = ans
+                pyplot.imshow(x)
                 pyplot.show()
+                pyplot.imshow(masks[0])
+                pyplot.show()
+                print(x)
             print("{} {}, loss: {}".format(max_[0, 200, 200].data, masks[0, 200, 200].data, loss))
             loss.backward()
             optimizer.step()
