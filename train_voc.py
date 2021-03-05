@@ -60,10 +60,14 @@ def main():
         model.optim_parameters_1x(args),
         lr=args.learning_rate, weight_decay=args.weight_decay)
     optimizer.zero_grad()
-
+    '''
     optimizer_10x = optim.SGD(
         model.optim_parameters_10x(args),
         lr=10 * args.learning_rate, momentum=args.momentum, weight_decay=args.weight_decay)
+    '''
+    optimizer_10x = optim.Adam(
+        model.optim_parameters_10x(args),
+        lr=10 * args.learning_rate, weight_decay=args.weight_decay)
     optimizer_10x.zero_grad()
 
     seg_loss = nn.CrossEntropyLoss(ignore_index=255)
@@ -121,12 +125,12 @@ def main():
             max_ = torch.argmax(pred, 1)
             #print(max_[0])
             if i % 10 == 0:
-                ans = max_[0].clone().detach().numpy()
+                ans = max_[0].clone().detach().cpu().numpy()
                 x = np.where(ans == 0, 255, ans)
                 #x = ans
                 pyplot.imshow(x)
                 pyplot.show()
-                pyplot.imshow(masks[0])
+                pyplot.imshow(masks[0].cpu())
                 pyplot.show()
                 print(x)
             print("{} {}, loss: {}".format(max_[0, 200, 200].data, masks[0, 200, 200].data, loss))
