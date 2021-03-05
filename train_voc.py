@@ -22,7 +22,6 @@ Real work start!
 '''
 def main():
     """ Main zero shot segmentation function """
-
     args = get_arguments()
     device = args.device
     print_config(args)
@@ -70,7 +69,8 @@ def main():
         lr=10 * args.learning_rate, weight_decay=args.weight_decay)
     optimizer_10x.zero_grad()
 
-    seg_loss = nn.CrossEntropyLoss(ignore_index=255)
+    #seg_loss = nn.CrossEntropyLoss(ignore_index=255)
+    seg_loss = FocalLoss() # merely test if focal loss is useful...
 
     interp = nn.Upsample(size=(input_size[1], input_size[0]), mode="bilinear", align_corners=True)
 
@@ -106,11 +106,10 @@ def main():
             #pyplot.show()
             #pyplot.imshow(masks[0])
             #pyplot.show()
-            print(masks[0])
+            #print(masks[0])
             images = images.to(device)
             masks = masks.long().to(device)
             pred = model(images, "all")
-
             pred = interp(pred)
 
             #vis = to_color_img(pred.clone().detach())

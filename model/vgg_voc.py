@@ -120,9 +120,8 @@ class Our_Model(nn.Module):
 class Decoder(nn.Module):
     def __init__(self, split):
         super(Decoder, self).__init__()
-        self.encoder = Our_Model(split)
         self.decoder = {}
 
     def forward(self, x, which_W=None, which_branch=None):
-        x = self.encoder(x)
+        x = self.decoder(x)
         return x

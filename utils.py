@@ -143,3 +143,24 @@ def print_config(args):
     print_args(args)
     print()
     #end print_config
+
+
+
+
+class FocalLoss(nn.Module):
+
+    def __init__(self, gamma=2, eps=1e-7):
+        super(FocalLoss, self).__init__()
+        # self.alpha = alpha
+        self.gamma = gamma
+        self.eps = eps
+        # self.ce = nn.BCELoss(reduction='mean')
+        self.ce = nn.CrossEntropyLoss(ignore_index=255)
+
+    def forward(self, input, target):
+        logp = self.ce(input, target)
+        # print(f'logp:{logp}')
+        p = torch.exp(-logp)
+        # print(f'p:{p}')
+        loss = ((1 - p) ** self.gamma) * logp
+        return loss.mean()
