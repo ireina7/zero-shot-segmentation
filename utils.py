@@ -145,6 +145,16 @@ def print_config(args):
     #end print_config
 
 
+#def mIoU(pred, label):
+def confusion_matrix(a, b, n):
+    k = (a >= 0) & (a < n)
+    #print(n*a[k].astype(int) + b[k], k)
+    return np.bincount(n * a[k].astype(int) + b[k], minlength=n ** 2).reshape(n, n)
+
+
+def per_class_iu(hist):
+    return np.diag(hist) / (hist.sum(1) + hist.sum(0) - np.diag(hist))
+
 
 
 class FocalLoss(nn.Module):

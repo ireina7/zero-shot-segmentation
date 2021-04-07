@@ -69,8 +69,8 @@ def main():
         lr=10 * args.learning_rate, weight_decay=args.weight_decay)
     optimizer_10x.zero_grad()
 
-    #seg_loss = nn.CrossEntropyLoss(ignore_index=255)
-    seg_loss = FocalLoss() # merely test if focal loss is useful...
+    seg_loss = nn.CrossEntropyLoss(ignore_index=255)
+    #seg_loss = FocalLoss() # merely test if focal loss is useful...
 
     interp = nn.Upsample(size=(input_size[1], input_size[0]), mode="bilinear", align_corners=True)
 
@@ -83,6 +83,7 @@ def main():
         print(">> Epoch: ", epoch)
         train_iter = enumerate(train_loader)
         model.train()
+        hist = np.zeros((15, 15))
         for i in range(data_len):
             print("Epoch {}, loop {}".format(epoch, i))
             loss_pixel = 0
@@ -106,11 +107,24 @@ def main():
             #pyplot.show()
             #pyplot.imshow(masks[0])
             #pyplot.show()
-            #print(masks[0])
+            # print("mask: ", masks[0][masks[0] != 255])
             images = images.to(device)
             masks = masks.long().to(device)
             pred = model(images, "all")
             pred = interp(pred)
+
+
+            # Calculate mIoU
+            pred_IoU = pred[0].permute(1, 2, 0)
+            pred_IoU = torch.max(pred, 1)[0].byte()
+            pred_cpu = pred_IoU.data.cpu().numpy()
+            mask_cpu = masks.numpy()
+            #print(mask_cpu.shape, pred_cpu.shape)
+            m = confusion_matrix(mask_cpu.flatten(), pred_cpu.flatten(), 15)
+            #print(m.shape)
+            hist += m
+            mIoUs = per_class_iu(hist)
+            print("> mIoU: {}".format(mIoUs))
 
             #vis = to_color_img(pred.clone().detach())
             #print(vis.shape)
@@ -131,7 +145,7 @@ def main():
                 pyplot.show()
                 pyplot.imshow(masks[0].cpu())
                 pyplot.show()
-                print(x)
+                #print(x)
             print("{} {}, loss: {}".format(max_[0, 200, 200].data, masks[0, 200, 200].data, loss))
             loss.backward()
             optimizer.step()
