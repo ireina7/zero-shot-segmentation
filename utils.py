@@ -1,12 +1,12 @@
 import argparse
 import torch
 import torch.nn as nn
-import numpy as np
+import numpy as np # type: ignore
 import torch.optim as optim
 import torch.backends.cudnn as cudnn
 import os
 import os.path as osp
-import matplotlib.pyplot as pyplot
+import matplotlib.pyplot as plt # type: ignore
 
 from config import *
 
@@ -147,13 +147,29 @@ def print_config(args):
 
 #def mIoU(pred, label):
 def confusion_matrix(a, b, n):
-    k = (a >= 0) & (a < n)
+    k = (a >= 0) & (a < n) & (b >= 0) & (b < n)
     #print(n*a[k].astype(int) + b[k], k)
     return np.bincount(n * a[k].astype(int) + b[k], minlength=n ** 2).reshape(n, n)
 
 
 def per_class_iu(hist):
     return np.diag(hist) / (hist.sum(1) + hist.sum(0) - np.diag(hist))
+
+
+
+def show_sample(batch):
+    imgs, msks = batch['image'], batch['label']
+    fig, axs = plt.subplots(1, 2, figsize=(10, 3))
+    axs[0].imshow(imgs[0].permute(1, 2, 0), cmap = 'Dark2')
+    axs[1].imshow(msks[0], cmap = 'Dark2')
+    #axs.set_title("test")
+    #axs.grid(True)
+
+    print("Displaying image of {}".format(batch['name']))
+    plt.show()
+
+
+
 
 
 

@@ -9,6 +9,7 @@ from dataset.transform_pixel import *
 from torchvision import transforms
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
+import matplotlib.pyplot as plt # type: ignore
 import numpy as np
 from PIL import Image
 
@@ -147,7 +148,7 @@ class VOCSegmentation(Dataset):
             with open(os.path.join(_splits_dir, splt + ".txt"), "r") as f:
                 lines = f.read().splitlines()
                 classes = lines[0]
-                print(classes)
+                print("Reading classes: {}".format(classes))
                 lines.remove(classes)
 
             for ii, line in enumerate(lines):
@@ -181,7 +182,7 @@ class VOCSegmentation(Dataset):
 
         if self.transform is not None:
             sample = self.transform(sample)
-            pass
+
         sample["name"] = _name
         sample["size"] = str(_size[0]) + "," + str(_size[1])
         return sample
@@ -197,4 +198,34 @@ class VOCSegmentation(Dataset):
         return _img, _target
 
     def __str__(self):
-        return "VOC2012(split=" + str(self.split) + ")"
+        return "VOC2012SegDataset(split=" + str(self.split) + ")"
+
+
+
+
+
+
+
+
+def debug_dataset(split):
+    data_loader = dataloader_voc(split = split)
+    data_iter = enumerate(data_loader)
+    while True:
+        try:
+            _, batch = data_iter.__next__()
+        except StopIteration:
+            data_iter = enumerate(data_loader)
+            _, batch = data_iter.__next__()
+        yield batch
+
+
+def debug_sample(batch):
+    imgs, msks = batch['image'], batch['label']
+    fig, axs = plt.subplots(1, 2, figsize=(10, 3))
+    axs[0].imshow(imgs[0].permute(1, 2, 0))
+    axs[1].imshow(msks[0])
+    #axs.set_title("test")
+    #axs.grid(True)
+
+    print("Displaying image of {}".format(batch['name']))
+    plt.show()

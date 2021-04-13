@@ -1,17 +1,20 @@
 import argparse
 import torch
 import torch.nn as nn
-import numpy as np
+import numpy as np # type: ignore
 import torch.optim as optim
 import torch.backends.cudnn as cudnn
 import os
 import os.path as osp
-import matplotlib.pyplot as pyplot
+import matplotlib.pyplot as pyplot # type: ignore
 from config import *
 from utils import *
 
 from dataset.dataset_voc import dataloader_voc
 from model.vgg_voc import Our_Model
+
+
+from typing import List, Set, Dict, Tuple, Optional, Union, Callable, Iterator
 
 
 
@@ -103,11 +106,7 @@ def main():
                 _, batch = train_iter.__next__()
 
             images, masks = batch["image"], batch["label"]
-            #pyplot.imshow(images[0])
-            #pyplot.show()
-            #pyplot.imshow(masks[0])
-            #pyplot.show()
-            # print("mask: ", masks[0][masks[0] != 255])
+            #print("mask: ", masks[0].min())
             images = images.to(device)
             masks = masks.long().to(device)
             pred = model(images, "all")
@@ -126,6 +125,7 @@ def main():
             mIoUs = per_class_iu(hist)
             print("> mIoU: {}".format(mIoUs))
 
+
             #vis = to_color_img(pred.clone().detach())
             #print(vis.shape)
             #pyplot.imshow(vis)
@@ -140,12 +140,17 @@ def main():
             if i % 10 == 0:
                 ans = max_[0].clone().detach().cpu().numpy()
                 x = np.where(ans == 0, 255, ans)
+                y = masks[0].clone().detach().cpu().numpy()
+                x[y == 255] = 255
+                show_sample(batch)
                 #x = ans
-                pyplot.imshow(x)
+                pyplot.imshow(x, cmap = 'Dark2')
                 pyplot.show()
+                '''
                 pyplot.imshow(masks[0].cpu())
                 pyplot.show()
-                #print(x)
+                '''
+
             print("{} {}, loss: {}".format(max_[0, 200, 200].data, masks[0, 200, 200].data, loss))
             loss.backward()
             optimizer.step()
