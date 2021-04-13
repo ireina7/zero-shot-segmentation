@@ -140,11 +140,12 @@ def main():
             if i % 10 == 0:
                 ans = max_[0].clone().detach().cpu().numpy()
                 x = np.where(ans == 0, 255, ans)
-                y = masks[0].clone().detach().cpu().numpy()
+                y = mask_cpu[0]
                 x[y == 255] = 255
                 show_sample(batch)
                 #x = ans
-                pyplot.imshow(x, cmap = 'Dark2')
+                pyplot.imshow(x, cmap = 'tab20', vmax = 20)
+                plt.colorbar()
                 pyplot.show()
                 '''
                 pyplot.imshow(masks[0].cpu())

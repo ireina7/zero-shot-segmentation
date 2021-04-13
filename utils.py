@@ -160,12 +160,13 @@ def per_class_iu(hist):
 def show_sample(batch):
     imgs, msks = batch['image'], batch['label']
     fig, axs = plt.subplots(1, 2, figsize=(10, 3))
-    axs[0].imshow(imgs[0].permute(1, 2, 0), cmap = 'Dark2')
-    axs[1].imshow(msks[0], cmap = 'Dark2')
+    axs[0].imshow(imgs[0].permute(1, 2, 0))
+    axs[1].imshow(msks[0], cmap = 'tab20', vmax = 20)
     #axs.set_title("test")
     #axs.grid(True)
 
     print("Displaying image of {}".format(batch['name']))
+    # plt.colorbar()
     plt.show()
 
 
