@@ -148,7 +148,7 @@ def print_config(args):
 #def mIoU(pred, label):
 def confusion_matrix(a, b, n):
     k = (a >= 0) & (a < n) & (b >= 0) & (b < n)
-    #print(n*a[k].astype(int) + b[k], k)
+    print(np.unique(a[k]), np.unique(b[k]))
     return np.bincount(n * a[k].astype(int) + b[k], minlength=n ** 2).reshape(n, n)
 
 

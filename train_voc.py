@@ -114,17 +114,26 @@ def main():
 
 
             # Calculate mIoU
+            print(pred.shape, masks.shape)
             pred_IoU = pred[0].permute(1, 2, 0)
             pred_IoU = torch.max(pred, 1)[0].byte()
+            print(pred_IoU.shape)
             pred_cpu = pred_IoU.data.cpu().numpy()
             mask_cpu = masks.cpu().numpy()
             #print(mask_cpu.shape, pred_cpu.shape)
+            print(mask_cpu.flatten().shape)
             m = confusion_matrix(mask_cpu.flatten(), pred_cpu.flatten(), 15)
             #print(m.shape)
-            hist += m
+            #hist += m
+            hist = m
             mIoUs = per_class_iu(hist)
             print("> mIoU: {}".format(mIoUs))
 
+            '''
+            m = confusion_matrix(np.array([1, 1, 1, 255]), np.array([1, 2, 0, 0]), 3)
+            mIoUs = per_class_iu(m)
+            print("test> mIoU: {}".format(mIoUs))
+            '''
 
             #vis = to_color_img(pred.clone().detach())
             #print(vis.shape)
