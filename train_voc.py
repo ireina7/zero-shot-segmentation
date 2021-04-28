@@ -117,7 +117,7 @@ def main():
             pred_IoU = pred[0].permute(1, 2, 0)
             pred_IoU = torch.max(pred, 1)[0].byte()
             pred_cpu = pred_IoU.data.cpu().numpy()
-            mask_cpu = masks.numpy()
+            mask_cpu = masks.cpu().numpy()
             #print(mask_cpu.shape, pred_cpu.shape)
             m = confusion_matrix(mask_cpu.flatten(), pred_cpu.flatten(), 15)
             #print(m.shape)
@@ -139,12 +139,13 @@ def main():
             #print(max_[0])
             if i % 10 == 0:
                 ans = max_[0].clone().detach().cpu().numpy()
-                x = np.where(ans == 0, 255, ans)
+                #x = np.where(ans == 0, 255, ans)
+                x = ans
                 y = mask_cpu[0]
                 x[y == 255] = 255
                 show_sample(batch)
                 #x = ans
-                pyplot.imshow(x, cmap = 'tab20', vmax = 20)
+                pyplot.imshow(x, cmap = 'tab20', vmin = 0, vmax = 21)
                 plt.colorbar()
                 pyplot.show()
                 '''
