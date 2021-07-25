@@ -5,6 +5,8 @@ import os
 import shutil
 from PIL import Image
 from dataset.transform_pixel import *
+from dataset.gen_splits import gen_split
+from dataset.gen_splits import ALL_CLASSES
 #from dataset.util import *
 from torchvision import transforms
 from torch.utils.data import Dataset
@@ -17,30 +19,30 @@ sys.path.append('../')
 import config
 
 
-def transform_for_train(fixed_scale=512, rotate_prob=15, classes=None, split=None):
+def transform_for_train(fixed_scale = 512, rotate_prob = 15, classes = None, split = None):
     """
     Options:
-    1.RandomCrop
-    2.CenterCrop
-    3.RandomHorizontalFlip
-    4.Normalize
-    5.ToTensor
-    6.FixedResize
-    7.RandomRotate
+    1. RandomCrop
+    2. CenterCrop
+    3. RandomHorizontalFlip
+    4. Normalize
+    5. ToTensor
+    6. FixedResize
+    7. RandomRotate
     """
     transform_list = []
     # transform_list.append(FixedResize(size = (fixed_scale, fixed_scale)))
     transform_list.append(RandomSized(fixed_scale))
     transform_list.append(RandomRotate(rotate_prob))
     transform_list.append(RandomHorizontalFlip())
-    transform_list.append(Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)))
-    transform_list.append(ToTensor(classes=classes, split=split))
+    transform_list.append(Normalize(mean = (0.485, 0.456, 0.406), std = (0.229, 0.224, 0.225)))
+    transform_list.append(ToTensor(classes = classes, split = split))
 
     return transforms.Compose(transform_list)
 
 
 
-def dataloader_test(data_path=config.DATA_VOC, split="1"):
+def dataloader_test(data_path = config.DATA_VOC, split = "1"):
     name = "split" + split + "_"+ "train_strong"
     im_ids = []
     images = []
@@ -72,38 +74,63 @@ def dataloader_test(data_path=config.DATA_VOC, split="1"):
     print(classes)
 
 
-def dataloader_voc(data_path=config.DATA_PATH,
-                   batch_size=4,
-                   input_size=(512, 512),
-                   shuffle=True,
-                   num_workers=2,
-                   split=None):
+def dataloader_voc(
+    data_path = config.DATA_PATH,
+    batch_size = 4,
+    input_size = (512, 512),
+    shuffle = True,
+    num_workers = 2,
+    split = None
+    ):
     """
     The main dataloader
     @param: split: 1 | 2 | 3 | 4
     """
-    name = 'split'
-    with open(os.path.join(data_path, name +".txt"), "r") as f:
+    name = 'split{}'.format(split)
+    file_path = os.path.join(data_path, name +".txt")
+    """
+    It's really sad that since the code written in `gen_splits.py` 
+    only considered `int` split representations, therefore we need to check many dirty things...
+    """
+    if isinstance(split, str) and split.isdigit():
+        i = int(split)
+        if i >= 0 and i <= 4:
+            gen_split(i)
+        else:
+            raise ValueError('split range should within [0, 4].')
+    else:
+        """
+        If is not a str which represent split as an integer number,
+        Raise an error since I currently don't want to support complex splits.
+        """
+        raise ValueError('Wrong format of split representation!')
+    with open(file_path, "r") as f:
         lines = f.read().splitlines()
         classes = lines[0]
         lines.remove(classes)
         classes = classes.split(",")
         classes = list(map(int, classes))
 
-    transform = transform_for_train(fixed_scale=input_size,
-                                    rotate_prob=15,
-                                    classes=classes,
-                                    split = split)
+    transform = transform_for_train(
+        fixed_scale = input_size,
+        rotate_prob = 15,
+        classes = classes,
+        split = split
+    )
 
-    voc_train = VOCSegmentation(base_dir=data_path,
-                                split=name,
-                                transform=transform)
+    voc_train = VOCSegmentation(
+        base_dir = data_path,
+        split = name,
+        transform = transform
+    )
 
-    dataloader = DataLoader(voc_train,
-                            batch_size=batch_size,
-                            shuffle=shuffle,
-                            num_workers=num_workers,
-                            drop_last=True)
+    dataloader = DataLoader(
+        voc_train,
+        batch_size = batch_size,
+        shuffle = shuffle,
+        num_workers = num_workers,
+        drop_last = True
+    )
     return dataloader
 
 
@@ -115,11 +142,12 @@ class VOCSegmentation(Dataset):
     PascalVoc dataset
     """
 
-    def __init__(self,
-                 base_dir=config.DATA_PATH,
-                 split="train",
-                 transform=None
-                 ):
+    def __init__(
+        self,
+        base_dir = config.DATA_PATH,
+        split = "train",
+        transform = None
+        ):
         """
         :param base_dir: path to VOC dataset directory
         :param split: train/val
@@ -147,9 +175,10 @@ class VOCSegmentation(Dataset):
         for splt in self.split:
             with open(os.path.join(_splits_dir, splt + ".txt"), "r") as f:
                 lines = f.read().splitlines()
-                classes = lines[0]
-                print("Reading classes: {}".format(classes))
-                lines.remove(classes)
+                self.classes = lines[0]
+                print("Reading classes: {}".format(self.classes))
+                lines.remove(self.classes)
+                # self.classes = list(map(lambda i: ALL_CLASSES[i], self.classes))
 
             for ii, line in enumerate(lines):
                 #print(line)
@@ -198,7 +227,7 @@ class VOCSegmentation(Dataset):
         return _img, _target
 
     def __str__(self):
-        return "VOC2012SegDataset(split=" + str(self.split) + ")"
+        return "VOC2012SegDataset(split = " + str(self.split) + ")"
 
 
 
@@ -221,7 +250,7 @@ def debug_dataset(split):
 
 def debug_sample(batch):
     imgs, msks = batch['image'], batch['label']
-    fig, axs = plt.subplots(1, 2, figsize=(10, 3))
+    fig, axs = plt.subplots(1, 2, figsize = (10, 3))
     axs[0].imshow(imgs[0].permute(1, 2, 0))
     axs[1].imshow(msks[0])
     #axs.set_title("test")

@@ -61,14 +61,16 @@ def get_Ws(embeddings, strong_classes):
 
 
 def get_Ws_split(embeddings, split):
-    ALL_CLASSES = ["bg", "airplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-                   "table", "dog", "horse", "motorbike", "person", "houseplant", "sheep", "sofa", "train",
-                   "monitor"]
-    all = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    split1 = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    split2 = [1, 2, 3, 4, 5, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    split3 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 16, 17, 18, 19, 20]
-    split4 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    ALL_CLASSES = [
+        "bg", "airplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
+        "table", "dog", "horse", "motorbike", "person", "houseplant", "sheep", "sofa", "train",
+        "monitor"
+    ]
+    all    = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    split1 = [               6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    split2 = [1, 2, 3, 4, 5,                 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    split3 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,                     16, 17, 18, 19, 20]
+    split4 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15                    ]
     strong_class = []
     if split == "1":
         strong_class = [ALL_CLASSES[x] for x in split1]

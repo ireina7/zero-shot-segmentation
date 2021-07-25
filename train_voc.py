@@ -83,12 +83,12 @@ def main():
 
 
     for epoch in range(args.num_epochs):
-        print(">> Epoch: ", epoch)
+        print("\n>> Epoch: ", epoch)
         train_iter = enumerate(train_loader)
         model.train()
         hist = np.zeros((15, 15))
         for i in range(data_len):
-            print("Epoch {}, loop {}".format(epoch, i))
+            print("\n> Epoch {}, loop {}".format(epoch, i))
             loss_pixel = 0
             loss_pixel_value = 0
 
@@ -120,7 +120,7 @@ def main():
             #pred_IoU = torch.max(pred_0, 0)[0].byte()
 
             max_ = torch.argmax(pred, 1)
-            pred_IoU  = max_[0].clone().detach().cpu().numpy()
+            pred_IoU = max_[0].clone().detach().cpu().numpy()
 
             #print(pred_IoU.shape)
             #pred_cpu = pred_IoU.data.cpu().numpy()
@@ -134,7 +134,7 @@ def main():
             mIoUs = per_class_iu(hist)
             print("> mIoU: {}".format(per_class_iu(m)))
             print("> mIoUs: {}".format(mIoUs))
-
+            print("> Average mIoUs: {}".format(sum(mIoUs) / len(mIoUs)))
 
             '''
             m = confusion_matrix(np.array([1, 1, 1, 255]), np.array([1, 2, 0, 0]), 3)
@@ -148,7 +148,6 @@ def main():
             #pyplot.imshow(masks[0])
             #pyplot.show()
             loss_pixel = seg_loss(pred, masks)
-
             loss = loss_pixel# + loss_qfsl
 
             max_ = torch.argmax(pred, 1)

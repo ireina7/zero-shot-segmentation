@@ -4,7 +4,7 @@ import sys
 import os
 import shutil
 from PIL import Image
-from transform_pixel import *
+from dataset.transform_pixel import *
 #from dataset.util import *
 from torchvision import transforms
 from torch.utils.data import Dataset
@@ -16,40 +16,40 @@ from PIL import Image
 sys.path.append('../')
 import config
 
-
+# 13 15 18
 '''
 All classes in dataset VOC2012 (including 21 classes if background is counted)
 '''
 ALL_CLASSES = [
-    "bg",
-    "aeroplane",
-    "bicycle",
-    "bird",
-    "boat",
-    "bottle",
-    "bus",
-    "car",
-    "cat",
-    "chair",
-    "cow",
-    "diningtable",
-    "dog",
-    "horse",
-    "motorbike",
-    "person",
-    "pottedplant",
-    "sheep",
-    "sofa",
-    "train",
-    "tvmonitor"
+    "bg",           #  0
+    "aeroplane",    #  1
+    "bicycle",      #  2
+    "bird",         #  3
+    "boat",         #  4
+    "bottle",       #  5
+    "bus",          #  6
+    "car",          #  7
+    "cat",          #  8
+    "chair",        #  9
+    "cow",          # 10
+    "diningtable",  # 11
+    "dog",          # 12
+    "horse",        # 13
+    "motorbike",    # 14
+    "person",       # 15
+    "pottedplant",  # 16
+    "sheep",        # 17
+    "sofa",         # 18
+    "train",        # 19
+    "tvmonitor"     # 20
 ]
 
 split = [
     [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], # split 0
-    [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],                # split 1
-    [1, 2, 3, 4, 5, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],                 # split 2
-    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 16, 17, 18, 19, 20],                     # split 3
-    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]                      # split 4
+    [               6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], # split 1
+    [1, 2, 3, 4, 5,                 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], # split 2
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,                     16, 17, 18, 19, 20], # split 3
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15                    ]  # split 4
 ]
 
 
@@ -71,12 +71,13 @@ def get_class_names_of_file(pure_file_name, xml_dir = config.DATA_VOC + 'Annotat
     return list(ans)
 
 
-def _gen_split(classes,
-              voc_path=config.DATA_VOC,
-              train_or_val='train',
-              file_name='split.txt',
-              save_or_not=True
-):
+def _gen_split(
+    classes,
+    voc_path = config.DATA_VOC,
+    train_or_val = 'train',
+    file_name = 'split.txt',
+    save_or_not = True
+    ):
     xml_dir = voc_path + 'Annotations/'
     jpg_dir = voc_path + 'JPEGImages/'
     seg_dir = voc_path + 'ImageSets/Segmentation/'
@@ -99,49 +100,84 @@ def _gen_split(classes,
         fp.write('\n'.join(ans['files']))
         fp.close()
 
-    print("Generated classes: {}, \nGenerated images: {}".format(len(ans['classes']), len(ans['files'])))
+    print("\
+        Generated classes: {}, \n\
+        Generated images: {}"
+            .format(len(ans['classes']), len(ans['files']))
+    )
     return ans
 
 
-def gen_split0(voc_path=config.DATA_VOC,
-               train_or_val='train',
-               file_name='split.txt',
-               save_or_not=True):
-    return _gen_split(list(map(lambda i: ALL_CLASSES[i], split[0])))
+def gen_split0(
+    voc_path = config.DATA_VOC,
+    train_or_val = 'train',
+    file_name = 'split0.txt',
+    save_or_not = True
+    ):
+    return _gen_split(
+        list(map(lambda i: ALL_CLASSES[i], split[0])), 
+        file_name = file_name
+    )
 
-def gen_split1(voc_path=config.DATA_VOC,
-               train_or_val='train',
-               file_name='split.txt',
-               save_or_not=True):
-    return _gen_split(list(map(lambda i: ALL_CLASSES[i], split[1])))
+def gen_split1(
+    voc_path = config.DATA_VOC,
+    train_or_val = 'train',
+    file_name = 'split1.txt',
+    save_or_not = True
+    ):
+    return _gen_split(
+        list(map(lambda i: ALL_CLASSES[i], split[1])), 
+        file_name = file_name
+    )
 
-def gen_split2(voc_path=config.DATA_VOC,
-               train_or_val='train',
-               file_name='split.txt',
-               save_or_not=True):
-    return _gen_split(list(map(lambda i: ALL_CLASSES[i], split[2])))
+def gen_split2(
+    voc_path = config.DATA_VOC,
+    train_or_val = 'train',
+    file_name = 'split2.txt',
+    save_or_not = True
+    ):
+    return _gen_split(
+        list(map(lambda i: ALL_CLASSES[i], split[2])), 
+        file_name = file_name
+    )
 
-def gen_split3(voc_path=config.DATA_VOC,
-               train_or_val='train',
-               file_name='split.txt',
-               save_or_not=True):
-    return _gen_split(list(map(lambda i: ALL_CLASSES[i], split[3])))
+def gen_split3(
+    voc_path = config.DATA_VOC,
+    train_or_val = 'train',
+    file_name = 'split3.txt',
+    save_or_not = True
+    ):
+    return _gen_split(
+        list(map(lambda i: ALL_CLASSES[i], split[3])), 
+        file_name = file_name
+    )
 
-def gen_split4(voc_path=config.DATA_VOC,
-               train_or_val='train',
-               file_name='split.txt',
-               save_or_not=True):
-    return _gen_split(list(map(lambda i: ALL_CLASSES[i], split[4])))
+def gen_split4(
+    voc_path = config.DATA_VOC,
+    train_or_val = 'train',
+    file_name = 'split4.txt',
+    save_or_not = True
+    ):
+    return _gen_split(
+        list(map(lambda i: ALL_CLASSES[i], split[4])), 
+        file_name = file_name
+    )
 
 
 
 '''
 The public `gen_split` interface
 '''
-def gen_split(i: int,
-              voc_path=config.DATA_VOC,
-              train_or_val='train',
-              file_name='split.txt',
-              save_or_not=True):
+def gen_split(
+    i: int,
+    voc_path = config.DATA_VOC,
+    train_or_val = 'train',
+    file_name = 'split.txt',
+    save_or_not = True
+    ):
     assert (i >= 0 and i < 5), "Error while generating splits: invalid split number: {}".format(i)
-    return _gen_split(list(map(lambda i: ALL_CLASSES[i], split[i])))
+    file_name = "split{}.txt".format(i)
+    return _gen_split(
+        list(map(lambda i: ALL_CLASSES[i], split[i])), 
+        file_name = file_name
+    )
